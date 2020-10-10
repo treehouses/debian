@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 get_variant_sha(){
     local sha
     docker_repo=$1  #debian or vmnet/debian
