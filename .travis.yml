@@ -32,7 +32,7 @@ before_deploy:
 - tag="$(date +%Y%m%d%H%M)"
 - echo $tag
 #- create_manifests treehouses/debian $tag  "debian@"$debian_x86_sha "debian@"$debian_rpi_sha
-- create_manifests treehouses/debian $tag  "amd64/debian@"$debian_x86_sha "balenalib/rpi-raspbian@"$debian_rpi_sha  "arm64v8/debian@"$debian_arm64_sha
+- create_manifests treehouses/debian $tag  "amd64/debian@"$debian_x86_sha "balenalib/rpi@"$debian_rpi_sha  "arm64v8/debian@"$debian_arm64_sha
 - docker manifest inspect treehouses/debian:latest
 - docker manifest inspect treehouses/debian:$tag
 deploy:
