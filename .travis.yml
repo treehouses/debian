@@ -1,0 +1,47 @@
+sudo: required
+addons:
+  apt:
+    update: true
+    packages:
+    - docker-ce
+services:
+- docker
+script:
+- export DOCKER_CLI_EXPERIMENTAL=enabled
+- source sha_function.sh
+#- debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
+- debian_x86_sha=$(get_tag_sha "amd64/debian" "buster-slim")
+- echo $debian_x86_sha
+- treehouses_debian_x86_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "amd64")
+- echo $treehouses_debian_x86_sha
+#- debian_rpi_sha=$(get_variant_sha "debian" "latest" "arm")
+- debian_rpi_sha=$(get_tag_sha "balenalib/rpi-raspbian" "buster")
+- echo $debian_rpi_sha
+- treehouses_rpi_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm")
+- echo $treehouses_rpi_sha
+#- debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
+- debian_arm64_sha=$(get_tag_sha "arm64v8/debian" "buster-slim")
+- echo $debian_arm64_sha
+- treehouses_debian_arm64_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm64")
+- echo $treehouses_debian_arm64_sha
+- flag=$(compare_sha  "$debian_x86_sha" "$treehouses_debian_x86_sha" "$debian_rpi_sha"
+  "$treehouses_rpi_sha" "$debian_arm64_sha" "$treehouses_debian_arm64_sha")
+- echo $flag
+- echo $DOCKERAPIKEY | docker login -u "sevenseas" --password-stdin
+before_deploy:
+- tag="$(date +%Y%m%d%H%M)"
+- echo $tag
+#- create_manifests treehouses/debian $tag  "debian@"$debian_x86_sha "debian@"$debian_rpi_sha
+- create_manifests treehouses/debian $tag  "amd64/debian@"$debian_x86_sha "balenalib/rpi-raspbian@"$debian_rpi_sha  "arm64v8/debian@"$debian_arm64_sha
+- docker manifest inspect treehouses/debian:latest
+- docker manifest inspect treehouses/debian:$tag
+deploy:
+- provider: script
+  script: docker manifest push treehouses/debian:latest; docker manifest push treehouses/debian:$tag
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: "$flag = true"
+env:
+  global:
+    - secure: UwPRxBfQSkFriTGzbK3/JtzFhKss8reVoeCRzM5hBR/sS9RKY7in4ET8ve0jd6PTZsBjp20BE9KB/zKHomVH6S5ZN4TZM/m8SCVSrnEXeG5N4IpLF7tZdybdU1TbnodcKFw/HT540lTuQQXPnxp6dutnN55j7dzAqNjp5RQA7hb9CvpNCIKQXFZZO6jmpv8d9rjZ/UhX611SqapYhg38rh/YUw8y+CRGUWtHzCOEDe71f6wP3kbVBhD5BKha/twXLiwHVRj2cHou92ltpBMU2y01232eC9WiL5yaWzx/1KW/lj6wabWr7JN5iEl1N346iVWMANW0dB1zb7FHEPV3RCKeuFUvdaR0X71QNzTQr6XqSbo3Wr3jS2QR3zcIdKahDL0rO0/ePJU5tu+q/eOYUEWGz4Jm8FN9j83InO97vNJfvlpxrC7z84SOvDNRzeAdz3m930VUweLcA5g+cUIXz4wCO/CeNZu8c5iBXqI4iCSS6O2rqXAlwVpR+oEhumiV0DEKVAxceyyStSJC804B9+vLek7lhaf+Qucm5YWKzwNa6We1IVeScnUyds8fc0esCYlz8jHbUErmd3Cc4CFTBNdVn5j562vt6mlLtgnIxhhmqF2TCPw9Zh4xGNjoF0+zz233a+UGC5mWauNGdwjEP1iPXW2CFjOAl+j/9b0B4bg=
