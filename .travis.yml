@@ -8,18 +8,15 @@ services:
 - docker
 script:
 - export DOCKER_CLI_EXPERIMENTAL=enabled
-- source sha_function.sh
-#- debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
+- source utils.sh
 - debian_x86_sha=$(get_tag_sha "amd64/debian" "buster")
 - echo $debian_x86_sha
 - treehouses_debian_x86_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "amd64")
 - echo $treehouses_debian_x86_sha
-#- debian_rpi_sha=$(get_variant_sha "debian" "latest" "arm")
 - debian_rpi_sha=$(get_tag_sha "balenalib/rpi" "buster")
 - echo $debian_rpi_sha
 - treehouses_rpi_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm")
 - echo $treehouses_rpi_sha
-#- debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
 - debian_arm64_sha=$(get_tag_sha "arm64v8/debian" "buster-slim")
 - echo $debian_arm64_sha
 - treehouses_debian_arm64_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm64")
@@ -31,7 +28,6 @@ script:
 before_deploy:
 - tag="$(date +%Y%m%d%H%M)"
 - echo $tag
-#- create_manifests treehouses/debian $tag  "debian@"$debian_x86_sha "debian@"$debian_rpi_sha
 - create_manifests treehouses/debian $tag  "amd64/debian@"$debian_x86_sha "balenalib/rpi@"$debian_rpi_sha  "arm64v8/debian@"$debian_arm64_sha
 - docker manifest inspect treehouses/debian:latest
 - docker manifest inspect treehouses/debian:$tag
