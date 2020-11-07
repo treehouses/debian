@@ -1,6 +1,6 @@
 #!/bin/bash
 
-get_manifest_sha (){
+get_manifest_sha(){
   local repo=$1
   local arch=$2
   docker pull -q $1 &>/dev/null
@@ -9,12 +9,12 @@ get_manifest_sha (){
   i=0
   while [ "$sha" == "" ] && read -r line
   do
-      archecture=$(jq .manifests[$i].platform.architecture "$2".txt |sed -e 's/^"//' -e 's/"$//')
-      if [ "$archecture" = "$2" ];then
-          sha=$(jq .manifests[$i].digest "$2".txt  |sed -e 's/^"//' -e 's/"$//')
-          echo ${sha}
-      fi
-      i=$i+1
+    architecture=$(jq .manifests[$i].platform.architecture "$2".txt |sed -e 's/^"//' -e 's/"$//')
+    if [ "$architecture" = "$2" ]; then
+      sha=$(jq .manifests[$i].digest "$2".txt  |sed -e 's/^"//' -e 's/"$//')
+      echo ${sha}
+    fi
+    i=$i+1
   done < "$2".txt
 }
 
@@ -28,9 +28,9 @@ get_tag_sha(){
 
 compare_sha () {
   if [ "$1" != "$2" ] || [ "$3" != "$4" ] || [ "$5" != "$6" ]; then
-      echo "true"
+    echo "true"
   else
-      echo "false"
+    echo "false"
   fi
 }
 
