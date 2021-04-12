@@ -7,7 +7,7 @@ on:
 
 jobs: 
   debian-docker-image-build:
-  runs-on: debian
+  runs-on: ubuntu-20.04
 
   steps:
     - names: Checkout
