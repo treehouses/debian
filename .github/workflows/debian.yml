@@ -17,7 +17,7 @@ jobs:
       - name: treehouses debian
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          repo="neethumohan1212/alpine"
+          repo="rjole/debian"
           source sha_function.sh
           alpine_x86_sha=$(get_variant_sha "alpine" "latest" "amd64")
           echo "alpine amd64"
