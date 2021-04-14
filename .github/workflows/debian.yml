@@ -19,19 +19,19 @@ jobs:
           export DOCKER_CLI_EXPERIMENTAL=enabled
           repo="rjole/debian"
           source sha_function.sh
-          debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
+          debian_x86_sha=$(get_variant_sha "amd64/debian" "buster")
           echo "debian amd64"
           echo $debian_x86_sha
-          variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
+          variant_debian_x86_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "amd64")
           echo "treehouses/debian amd64"
           echo $variant_debian_x86_sha
-          balena_rpi_sha=$(get_tag_sha "balenalib/raspberry-pi-debian" "latest")
+          balena_rpi_sha=$(get_tag_sha "arm64v8/debian" "buster-slim")
           echo $balena_rpi_sha
-          variant_rpi_sha=$(get_manifest_sha "$repo:latest" "arm")
+          variant_rpi_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm64")
           echo $variant_rpi_sha
-          debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
+          debian_arm64_sha=$(get_variant_sha "arm64v8/debian" "buster-slim")
           echo $debian_arm64_sha
-          variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
+          variant_debian_arm64_sha=$(get_manifest_sha "treehouses/debian:buster-20201009" "arm64")
           echo $variant_debian_arm64_sha
           flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
           echo $flag
