@@ -32,17 +32,17 @@ jobs:
           debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
           echo $debian_arm64_sha
           variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
-          echo $variant_alpine_arm64_sha
-          flag=$(compare_sha  "$alpine_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$alpine_arm64_sha" "$variant_alpine_arm64_sha")
+          echo $variant_debian_arm64_sha
+          flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
           echo $flag
           tag="3.12-$(date +%Y%m%d%H%M)"
           tag2="latest"
           echo $tag
-          docker manifest create $repo:$tag "debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "debian@"$debian_arm64_sha
-          docker manifest create $repo:latest "debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "debian@"$debian_arm64_sha
+          docker manifest create $repo:$tag "amd64/debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "arm64v8/debian@"$debian_arm64_sha
+          docker manifest create $repo:latest "arm64v8/debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "arm64v8/debian@"$debian_arm64_sha
           docker manifest annotate $repo:latest "balenalib/raspberry-pi-debian@"$balena_rpi_sha --arch arm
-          docker manifest annotate $repo:$tag "debian@"$debian_arm64_sha --arch arm64
-          docker manifest annotate $repo:latest "debian@"$debian_arm64_sha --arch arm64
+          docker manifest annotate $repo:$tag "arm64v8/debian@"$debian_arm64_sha --arch arm64
+          docker manifest annotate $repo:latest "arm64v8/debian@"$debian_arm64_sha --arch arm64
           docker manifest annotate $repo:$tag "balenalib/raspberry-pi-debian@"$balena_rpi_sha --arch arm
           docker manifest inspect $repo:$tag
           docker manifest inspect $repo:$tag2
