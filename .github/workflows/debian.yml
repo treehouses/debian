@@ -38,7 +38,7 @@ jobs:
           tag="3.12-$(date +%Y%m%d%H%M)"
           tag2="latest"
           echo $tag
-          docker manifest create $repo:$tag "amd64/debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "arm64v8/debian@"$debian_arm64_sha
+          docker manifest create $repo:$tag "arm64v8/debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "arm64v8/debian@"$debian_arm64_sha
           docker manifest create $repo:latest "arm64v8/debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "arm64v8/debian@"$debian_arm64_sha
           docker manifest annotate $repo:latest "balenalib/raspberry-pi-debian@"$balena_rpi_sha --arch arm
           docker manifest annotate $repo:$tag "arm64v8/debian@"$debian_arm64_sha --arch arm64
