@@ -22,16 +22,16 @@ jobs:
           debian_x86_sha=$(get_variant_sha "amd64/debian" "buster")
           echo "debian amd64"
           echo $debian_x86_sha
-          variant_debian_x86_sha=$(get_manifest_sha "treehouses/debian:latest" "amd64")
+          variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
           echo "treehouses/debian amd64"
           echo $variant_debian_x86_sha
           balena_rpi_sha=$(get_tag_sha "arm64v8/debian" "buster-slim")
           echo $balena_rpi_sha
-          variant_rpi_sha=$(get_manifest_sha "treehouses/debian:latest" "arm64")
+          variant_rpi_sha=$(get_manifest_sha "$repo:latest" "arm64")
           echo $variant_rpi_sha
           debian_arm64_sha=$(get_variant_sha "arm64v8/debian" "buster-slim")
           echo $debian_arm64_sha
-          variant_debian_arm64_sha=$(get_manifest_sha "treehouses/debian:latest" "arm64")
+          variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
           echo $variant_debian_arm64_sha
           flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
           echo $flag
