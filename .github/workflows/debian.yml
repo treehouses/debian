@@ -19,7 +19,7 @@ jobs:
           export DOCKER_CLI_EXPERIMENTAL=enabled
           repo="rjole/debian"
           source sha_function.sh
-          debian_x86_sha=$(get_variant_sha "amd64v8/debian" "latest")
+          debian_x86_sha=$(get_variant_sha "amd64v8/debian" "latest" "buster")
           echo "debian amd64"
           echo $debian_x86_sha
           variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
