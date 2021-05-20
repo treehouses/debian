@@ -2,13 +2,15 @@ name: debian-docker-image-build
 
 on:
   push:
-  schedule:
-    - cron: '0 */8 * * *'
+    branches:
+      - master
+  workflow_dispatch:
+  repository_dispatch:
+    types: debian
 
-jobs: 
-  debian-docker-image-build:
-    runs-on: ubuntu-latest
-
+jobs:
+  alpine:
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -18,7 +20,7 @@ jobs:
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
           repo="rjole/debian"
-          source sha_function.sh
+          source utils.sh
           debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
           echo "debian amd64"
           echo $debian_x86_sha
