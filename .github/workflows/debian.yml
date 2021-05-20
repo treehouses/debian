@@ -19,7 +19,7 @@ jobs:
       - name: treehouses debian
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          repo="rjole/debian"
+          repo="treehouses/debian"
           source utils.sh
           debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
           echo "debian amd64"
