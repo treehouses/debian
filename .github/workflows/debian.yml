@@ -2,12 +2,15 @@ name: debian-docker-image-build
 
 on:
   push:
-  schedule:
-    - cron: '0 */8 * * *'
+    branches:
+      - master
+  workflow_dispatch:
+  repository_dispatch:
+    types: alpine
 
-jobs: 
-  debian-docker-image-build:
-    runs-on: ubuntu-latest
+jobs:
+  debian:
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout
