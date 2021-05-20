@@ -6,12 +6,11 @@ on:
       - master
   workflow_dispatch:
   repository_dispatch:
-    types: alpine
+    types: debian
 
 jobs:
   debian:
     runs-on: ubuntu-20.04
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,8 +19,8 @@ jobs:
       - name: treehouses debian
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          repo="rjole/debian"
-          source sha_function.sh
+          repo="treehouses/debian"
+          source .github/workflows/utils.sh
           debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
           echo "debian amd64"
           echo $debian_x86_sha
