@@ -2,7 +2,7 @@
 
 get_variant_sha(){
     local sha
-    docker_repo=$1  #alpine or vmnet/alpine
+    docker_repo=$1
     manifest_tag=$2
     docker_image=$docker_repo:$manifest_tag
     arch=$3
