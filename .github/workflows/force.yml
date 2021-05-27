@@ -1,12 +1,12 @@
-name: build on change
+name: build by force
 
 on:
-  push:
-    branches:
-      - master
+  #push:
+    #branches:
+     # - master
   workflow_dispatch:
-  repository_dispatch:
-    types: debian
+  #repository_dispatch:
+   #types: debian
 
 jobs:
   debian:
@@ -24,20 +24,21 @@ jobs:
           echo "amd64"
           debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
           echo $debian_x86_sha
-          variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
-          echo $variant_debian_x86_sha
+          #variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
+          #echo $variant_debian_x86_sha
           echo "arm"
           balena_rpi_sha=$(get_tag_sha "balenalib/raspberry-pi-debian" "latest")
           echo $balena_rpi_sha
-          variant_rpi_sha=$(get_manifest_sha "$repo:latest" "arm")
-          echo $variant_rpi_sha
+          #variant_rpi_sha=$(get_manifest_sha "$repo:latest" "arm")
+          #echo $variant_rpi_sha
           echo "arm64"
           debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
           echo $debian_arm64_sha
-          variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
-          echo $variant_debian_arm64_sha
+          #variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
+          #echo $variant_debian_arm64_sha
           echo "change"
-          flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
+          #flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
+          flag=true
           echo $flag
           if [[ $flag == true ]]; then
             tag="$(date +%Y%m%d%H%M)"
