@@ -39,7 +39,6 @@ jobs:
           echo "change"
           flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
           echo $flag
-          flag=true
           if [[ $flag == true ]]; then
             tag="$(date +%Y%m%d%H%M)"
             echo $tag
