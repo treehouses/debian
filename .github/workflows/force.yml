@@ -2,12 +2,12 @@ name: build by force
 
 on:
   #push:
-    #branches:
-      #- master
-      #- main
+  #  branches:
+  #    - master
+  #    - main
   workflow_dispatch:
   #repository_dispatch:
-   #types: debian
+  #  types: debian
 
 jobs:
   debian:
@@ -59,7 +59,7 @@ jobs:
             docker manifest inspect $repo:$tag2
             docker manifest push $repo:$tag2 
             echo "https://hub.docker.com/r/treehouses/debian/tags"
-            treehouses feedback https://hub.docker.com/r/treehouses/debian/tags"
+            treehouses feedback "new treehouses/debian check https://hub.docker.com/r/treehouses/debian/tags"
           else
             echo "no changes"
           fi
