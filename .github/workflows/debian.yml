@@ -32,7 +32,6 @@ jobs:
           export DOCKER_CLI_EXPERIMENTAL=enabled
           version="buster"
           repo="rjpadilla/debian-tags:${{ matrix.arch }}"
-          echo 2
           case ${{ matrix.arch }} in
             amd64) : "amd64/debian:$version" ;;
             arm) : "balenalib/raspberry-pi-debian:$version" ;;
