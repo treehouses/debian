@@ -30,8 +30,7 @@ jobs:
         id: set-flag
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          source .github/workflows/utils.sh
-          version="3.12"
+          version="buster"
           repo="rjpadilla/debian-tags:${{ matrix.arch }}"
           case ${{ matrix.arch }} in
             amd64) : "amd64/debian:$version" ;;
