@@ -73,7 +73,7 @@ jobs:
         id: set-build
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          version="3.12"
+          version="buster"
           case ${{ matrix.arch }} in
             amd64) : "amd64/debian:$version" ;;
             arm) : "balenalib/raspberry-pi-debian:$version" ;;
