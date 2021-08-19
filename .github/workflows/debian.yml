@@ -1,4 +1,4 @@
-name: build on change
+name: build image
 
 on:
   push:
@@ -6,59 +6,129 @@ on:
       - master
       - main
   workflow_dispatch:
+    inputs:
+      buildtype:
+        description: 'Build by "force" or on "change"'
+        required: true
+        default: 'force'
   repository_dispatch:
     types: debian
 
 jobs:
-  debian:
-    runs-on: ubuntu-20.04
+
+  compare:
+    runs-on: ubuntu-latest
+    outputs:
+      flag: ${{ steps.set-flag.outputs.flag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm, arm64]
     steps:
-      - name: checkout
+      - name: checkout repository
         uses: actions/checkout@v2
-      - name: docker login
-        run: docker login -u ${{ secrets.DOCKERUSERNAME }} -p ${{ secrets.DOCKERAPIKEY }}
-      - name: treehouses debian
+      - name: container registries
+        run: |
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          docker login docker.io -u ${{ secrets.DOCKERUSERNAME }} -p ${{ secrets.DOCKERAPIKEY }}
+      - name: compare image
+        id: set-flag
         run: |
           export DOCKER_CLI_EXPERIMENTAL=enabled
-          repo="treehouses/debian"
-          source .github/workflows/utils.sh
-          echo "amd64"
-          debian_x86_sha=$(get_variant_sha "debian" "latest" "amd64")
-          echo $debian_x86_sha
-          variant_debian_x86_sha=$(get_manifest_sha "$repo:latest" "amd64")
-          echo $variant_debian_x86_sha
-          echo "arm"
-          balena_rpi_sha=$(get_tag_sha "balenalib/raspberry-pi-debian" "latest")
-          echo $balena_rpi_sha
-          variant_rpi_sha=$(get_manifest_sha "$repo:latest" "arm")
-          echo $variant_rpi_sha
-          echo "arm64"
-          debian_arm64_sha=$(get_variant_sha "debian" "latest" "arm64")
-          echo $debian_arm64_sha
-          variant_debian_arm64_sha=$(get_manifest_sha "$repo:latest" "arm64")
-          echo $variant_debian_arm64_sha
-          echo "change"
-          flag=$(compare_sha  "$debian_x86_sha" "$variant_debian_x86_sha" "$balena_rpi_sha" "$variant_rpi_sha" "$debian_arm64_sha" "$variant_debian_arm64_sha")
-          echo $flag
-          if [[ $flag == true ]]; then
-            sudo npm install -g @treehouses/cli
-            export gitter_channel="${{ secrets.CHANNEL }}"
-            tag="$(date +%Y%m%d%H%M)"
-            echo $tag
-            docker manifest create $repo:$tag "debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "debian@"$debian_arm64_sha
-            docker manifest annotate $repo:$tag "debian@"$debian_arm64_sha --arch arm64
-            docker manifest annotate $repo:$tag "balenalib/raspberry-pi-debian@"$balena_rpi_sha --arch arm
-            docker manifest inspect $repo:$tag
-            docker manifest push $repo:$tag
-            tag2="latest"
-            echo $tag2
-            docker manifest create $repo:$tag2 "debian@"$debian_x86_sha "balenalib/raspberry-pi-debian@"$balena_rpi_sha "debian@"$debian_arm64_sha
-            docker manifest annotate $repo:$tag2 "debian@"$debian_arm64_sha --arch arm64
-            docker manifest annotate $repo:$tag2 "balenalib/raspberry-pi-debian@"$balena_rpi_sha --arch arm
-            docker manifest inspect $repo:$tag2
-            docker manifest push $repo:$tag2 
-            echo "https://hub.docker.com/r/treehouses/debian/tags"
-            treehouses feedback "new treehouses/debian check https://hub.docker.com/r/treehouses/debian/tags"
-          else
-            echo "no changes"
-          fi
+          version="buster"
+          repo="treehouses/debian-tags:${{ matrix.arch }}"
+          case ${{ matrix.arch }} in
+            amd64) : "amd64/debian:$version" ;;
+            arm) : "balenalib/raspberry-pi-debian:$version" ;;
+            arm64) : "arm64v8/debian:$version" ;;
+          esac
+          base="$_"
+          docker pull -q $base &>/dev/null
+          docker pull -q $repo &>/dev/null
+          basesha=$(docker image inspect $base | jq --raw-output '.[0].RootFS.Layers|.[]')
+          reposha=$(docker image inspect $repo | jq --raw-output '.[0].RootFS.Layers|.[]')
+          echo "base sha:$basesha repo sha:$reposha"
+          ${{ github.event.inputs.buildtype  == 'force' }} && echo "::set-output name=flag::true" || echo "building on change" 
+          [[ $reposha == *$basesha* ]] && echo "no changes" || echo "::set-output name=flag::true"
+
+  images:
+    needs: compare
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.set-build.outputs.build }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm, arm64]
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: container registries
+        run: |
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          docker login docker.io -u ${{ secrets.DOCKERUSERNAME }} -p ${{ secrets.DOCKERAPIKEY }}
+      - name: docker image
+        if: ${{ needs.compare.outputs.flag }}
+        id: set-build
+        run: |
+          export DOCKER_CLI_EXPERIMENTAL=enabled
+          version="buster"
+          case ${{ matrix.arch }} in
+            amd64) : "amd64/debian:$version" ;;
+            arm) : "balenalib/raspberry-pi-debian:$version" ;;
+            arm64) : "arm64v8/debian:$version" ;;
+          esac
+          image="$_"
+          repo="treehouses/debian-tags"
+          dest="$repo:${{ matrix.arch }}"
+          date="$(date +%Y%m%d%H%M)"
+          docker build -t ghcr.io/$dest --build-arg IMAGE=$image .
+          docker tag ghcr.io/$dest docker.io/$dest
+          docker tag ghcr.io/$dest ghcr.io/$dest-$date
+          docker tag docker.io/$dest docker.io/$dest-$date
+          docker push --all-tags ghcr.io/$repo
+          docker push --all-tags docker.io/$repo
+          docker images
+          echo "::set-output name=build::true"
+
+  manifests:
+    needs: images
+    strategy:
+      fail-fast: false
+      matrix:
+        registry: [docker.io, ghcr.io]
+    runs-on: ubuntu-latest
+    outputs:
+      send: ${{ steps.set-send.outputs.send }}
+    steps:
+      - name: container registries
+        run: |
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          docker login docker.io -u ${{ secrets.DOCKERUSERNAME }} -p ${{ secrets.DOCKERAPIKEY }}
+      - name: create manifests
+        if: ${{ needs.images.outputs.build }}
+        id: set-send
+        run: |
+          repo="${{ matrix.registry }}/treehouses/debian"
+          date="$(date +%Y%m%d%H%M)"
+          docker manifest create $repo:latest $repo-tags:amd64 $repo-tags:arm $repo-tags:arm64
+          docker manifest create $repo:$date $repo-tags:amd64 $repo-tags:arm $repo-tags:arm64
+          docker manifest annotate $repo:latest $repo-tags:arm --os linux --arch arm
+          docker manifest annotate $repo:$date $repo-tags:arm --os linux --arch arm
+          docker manifest inspect $repo:latest
+          docker manifest push $repo:latest
+          docker manifest push $repo:$date
+          echo "::set-output name=send::true"
+
+  message:
+    needs: manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: message chat of new image
+        if: ${{ needs.manifests.outputs.send }}
+        run: |
+          sudo npm install -g @treehouses/cli
+          export gitter_channel="${{ secrets.CHANNEL }}"
+          echo "https://hub.docker.com/r/treehouses/debian/tags"
+          echo "https://github.com/treehouses/debian/pkgs/container/debian"
+          treehouses feedback "new treehouses/debian check https://hub.docker.com/r/treehouses/debian/tags or https://github.com/treehouses/debian/pkgs/container/debian"
